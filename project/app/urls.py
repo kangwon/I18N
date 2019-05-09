@@ -5,13 +5,21 @@ from app import views
 
 
 router = routers.DefaultRouter()
-router.register(r'keys', views.KeyViewSet, 'Key')
+
 router.register(
-    r'keys/(?P<key_id>[0-9]+)/translations',
-    views.TranslationViewSet,
-    'Translation',
+    prefix=r'keys', 
+    viewset=views.KeyViewSet, 
+    base_name='Key'
 )
 
 urlpatterns = [
     path('', include(router.urls)),
+    path(
+        'keys/<int:key_id>/translations/', 
+        views.TranslationListView.as_view(),
+    ),
+    path(
+        'keys/<int:key_id>/translations/<str:locale>/', 
+        views.TranslrationDetailView.as_view(),
+    ),
 ]

@@ -12,5 +12,7 @@ class KeySerializer(serializers.ModelSerializer):
 class TranslationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Translation
-        fields = ('id', 'value')
-        readonlys = ('key_id', 'locale',)
+        fields = ('id', 'value', 'keyId', 'locale',)
+        read_only_fields = ('locale', 'keyId',)
+
+    keyId = serializers.PrimaryKeyRelatedField(source='key', read_only=True)

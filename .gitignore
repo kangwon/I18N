@@ -1,0 +1,14 @@
+.vscode
+venv/
+
+__pycache__
+*.py[cod]
+*.log
+*.pot
+local_settings.py
+
+db.sqlite3
+
+.DS_Store
+.AppleDouble
+.LSOverride

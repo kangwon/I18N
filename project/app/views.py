@@ -2,8 +2,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
-from app.models import Key, Translation
+from app.models import Key, Translation, is_valid_locale
 from app.serializers import KeySerializer, TranslationSerializer
 
 
@@ -77,11 +78,17 @@ class TranslrationDetailView(generics.GenericAPIView):
         })
 
     def post(self, request, *args, **kwargs):
+        if self.get_queryset().exists():
+            raise ValidationError('There already exist the translation.')
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
+        key, locale = self.get_key_and_locale_or_400()
+        
         serializer.save(
-            key=Key.objects.get(id=self.kwargs.get('key_id')),
-            locale=self.kwargs.get('locale'),
+            key=key,
+            locale=locale,
         )
         return Response({
             'translation': serializer.data,
@@ -98,3 +105,19 @@ class TranslrationDetailView(generics.GenericAPIView):
         return Response({
             'translation': serializer.data,
         })
+
+    def get_key_and_locale_or_400(self):
+        validate_error_detail = dict()
+
+        key = Key.objects.get(id=self.kwargs.get('key_id'))
+        if not key:
+            validate_error_detail['key'] = f'There is no such key: {key}'
+
+        locale = self.kwargs.get('locale')
+        if not is_valid_locale(locale):
+            validate_error_detail['locale'] = f'Invalid locale: {locale}'
+
+        if validate_error_detail:
+            raise ValidationError(validate_error_detail)
+        
+        return key, locale

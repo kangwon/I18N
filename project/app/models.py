@@ -8,6 +8,10 @@ LOCALE_CHOICES = (
 )
 
 
+def is_valid_locale(locale):
+    return locale in [e[0] for e in LOCALE_CHOICES]
+
+
 class Key(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True)

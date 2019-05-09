@@ -13,8 +13,12 @@ class KeyViewSet(viewsets.GenericViewSet):
     serializer_class = KeySerializer
 
     def list(self, request, *args, **kwargs):
+        queryset = self.queryset.all()
+        name = request.GET.get('name')
+        if name:
+            queryset = queryset.filter(name__contains=name)
         return Response({
-            'keys': self.serializer_class(self.queryset.all(), many=True).data,
+            'keys': self.serializer_class(queryset, many=True).data,
         })
 
     def create(self, request, *args, **kwargs):

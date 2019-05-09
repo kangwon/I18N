@@ -29,7 +29,16 @@ class KeyViewSet(viewsets.GenericViewSet):
         })
 
     def update(self, request, *args, **kwargs):
-        pass
+        serializer = self.get_serializer(
+            instance=self.get_object(),
+            data=request.data,
+            partial=False,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({
+            'key': serializer.data,
+        })
 
 
 class TranslationViewSet(viewsets.ModelViewSet):

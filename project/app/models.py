@@ -15,10 +15,10 @@ class Key(models.Model):
 
 class Translation(models.Model):
     class Meta:
-        unique_together = [['key_id', 'locale']]
+        unique_together = [['key', 'locale']]
 
     id = models.AutoField(primary_key=True)
-    key_id = models.ForeignKey(
+    key = models.ForeignKey(
         'Key',
         related_name='translations',
         on_delete=models.CASCADE,

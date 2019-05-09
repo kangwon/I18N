@@ -10,10 +10,13 @@ LOCALE_CHOICES = (
 
 class Key(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
 
 class Translation(models.Model):
+    class Meta:
+        unique_together = [['key_id', 'locale']]
+
     id = models.AutoField(primary_key=True)
     key_id = models.ForeignKey(
         'Key',

@@ -10,7 +10,7 @@ class KeyTestCase(TestCase):
             "name": "test.first.key"
         }
         Key.objects.create(**self.sample_obj)
-    
+
     def test_list(self):
         response = self.client.get('/keys/')
         self.assertJSONEqual(response.content, {"keys": [self.sample_obj]})
@@ -43,10 +43,27 @@ class KeyTestCase(TestCase):
             "key with this name already exists."
         ]})
 
+    def test_invalid_key_name(self):
+        response = self.client.post('/keys/', {
+            'name': '1234',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"name": [
+            "This value does not match the required pattern."
+        ]})
+        response = self.client.put('/keys/1/', {
+                'name': '1234',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"name": [
+            "This value does not match the required pattern."
+        ]})
+
+
     def test_update(self):
-        response = self.client.put(
-            path='/keys/1/', 
-            data={
+        response = self.client.put('/keys/1/', {
                 'name': 'test.first.key.updated',
             },
             content_type='application/json',

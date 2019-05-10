@@ -72,3 +72,73 @@ class KeyTestCase(TestCase):
             'id': self.sample_obj["id"],
             'name': 'test.first.key.updated',
         }})
+
+
+class TranslationTestCase(TestCase):
+    def setUp(self):
+        self.sample_key = Key.objects.create(**{
+            "id": 1,
+            "name": "test.first.key"
+        })
+        Translation.objects.create(**{
+            "id": 1,
+            "value": "test translation",
+            "key": self.sample_key,
+            "locale": "en",
+        })
+        self.sample_obj = {
+            "id": 1,
+            "value": "test translation",
+            "keyId": 1,
+            "locale": "en",
+        }
+
+    def test_list(self):
+        response = self.client.get('/keys/1/translations/')
+        self.assertJSONEqual(response.content, {"translations": [self.sample_obj]})
+
+    def test_retrieve(self):
+        response = self.client.get('/keys/1/translations/en/')
+        self.assertJSONEqual(response.content, {"translation": self.sample_obj})
+
+    def test_create(self):
+        response = self.client.post('/keys/1/translations/ko/', {
+            'value': '테스트 변역문',
+        })
+        self.assertJSONEqual(response.content, {"translation": {
+            'id': 2,
+            "value": "테스트 변역문",
+            "keyId": 1,
+            "locale": "ko",
+        }})
+
+    def test_create_duplicated(self):
+        response = self.client.post('/keys/1/translations/en/', {
+            'value': 'test test',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, [
+            "There already exist the translation."
+        ])
+
+    def test_create_invalid_locale(self):
+        response = self.client.post('/keys/1/translations/py/', {
+            'value': 'test = TestCase()',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            'locale': 'Invalid locale: py'
+        })
+
+    def test_update(self):
+        response = self.client.put('/keys/1/translations/en/', {
+                'value': 'updated translation',
+            },
+            content_type='application/json',
+        )
+        self.assertJSONEqual(response.content, {"translation": {
+            "id": 1,
+            'value': 'updated translation',
+            "keyId": 1,
+            "locale": "en",
+        }})
